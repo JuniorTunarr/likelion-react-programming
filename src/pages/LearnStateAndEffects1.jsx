@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 
 const getFontWeight = (selectedFontWeight) => {
   let fontWeight = '';
@@ -46,27 +46,37 @@ function LearnStateAndEffects() {
     fontWeightList[3] // 400
   );
 
+  const handleChangeFontWeight = useCallback(
+    (index) => () => {
+      setSelectedFontWeight(fontWeightList[index]);
+    },
+    [fontWeightList, setSelectedFontWeight]
+  );
+
   const fontWeight = getFontWeight(selectedFontWeight);
 
-  console.log(setSelectedFontWeight);
+  const WeightButton = ({ weight, index, isActive, onClickHandler }) => {
+    const className = useMemo(
+      () => `
+                py-0.5 px-1.5 bg-stone-100 rounded-full
+                ${isActive ? 'bg-stone-950 text-stone-50' : ''}
+                hover:bg-stone-800
+                hover:text-stone-100
+                transition-colors duration-200
+            `,
+      [isActive]
+    );
 
-  //# 기존 이벤트 핸들러
-  const handleChangeFontWeight = (index) => {
-    setSelectedFontWeight(fontWeightList[index]);
-  };
-
-  //# HOF 방식의 이벤트 핸들러
-  function handleChangeFontWeight1(index) {
-    function handleChangeFontWeight2() {
-      return setSelectedFontWeight(fontWeightList[index]);
-    }
-
-    return handleChangeFontWeight2;
-  }
-
-  //# HOF 방식의 이벤트 핸들러(단축)
-  const handleChangeFontWeight3 = (index) => () => {
-    setSelectedFontWeight(fontWeightList[index]);
+    return (
+      <button
+        key={weight}
+        type="button"
+        onClick={onClickHandler(index)}
+        className={className}
+      >
+        {weight}
+      </button>
+    );
   };
 
   return (
@@ -83,25 +93,15 @@ function LearnStateAndEffects() {
         role="group"
         className="bg-stone-100 py-1 px-4 rounded-full shadow-lg shadow-indigo-300/40"
       >
-        {fontWeights.map((weight, index) => {
-          const isActive = weight === selectedFontWeight;
-          return (
-            <button
-              key={weight}
-              type="button"
-              onClick={() => handleChangeFontWeight(index)}
-              className={`
-                  py-0.5 px-1.5 bg-stone-100 rounded-full
-                  ${isActive ? 'bg-stone-950 text-stone-50' : ''}
-                  hover:bg-stone-800
-                  hover:text-stone-100
-                  transition-colors duration-200
-                `}
-            >
-              {weight}
-            </button>
-          );
-        })}
+        {fontWeightList.map((weight, index) => (
+          <WeightButton
+            key={index}
+            weight={weight}
+            index={index}
+            isActive={selectedFontWeight === fontWeightList[index]}
+            onClickHandler={handleChangeFontWeight}
+          />
+        ))}
       </div>
     </div>
   );
