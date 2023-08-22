@@ -1,0 +1,52 @@
+import useProductList from '@/api/useProductList';
+import Spinner from '@/components/Spinner';
+import useDocumentTitle from '@/hooks/useDocumentTitle';
+import { getPbImageURL, numberWithComma } from '@/utils';
+import { Link } from 'react-router-dom';
+
+function Products() {
+  useDocumentTitle('제품 목록');
+
+  const { status, data, error } = useProductList();
+
+  if (status === 'loading') {
+    return <Spinner size={160} />;
+  }
+
+  if (status === 'error') {
+    return <div role="alert">{error.message}</div>;
+  }
+
+  if (status === 'success') {
+    return (
+      <div>
+        <h1 className="text-indigo-950 text-2xl mb-5">Products</h1>
+        <ul className="grid grid-cols-3">
+          {data.map((item) => (
+            <li key={item.id} className="justify-self-center">
+              <Link to={`/product/edit/${item.id}`}>
+                <figure>
+                  <img
+                    className="h-[160px] object-cover mx-auto"
+                    src={getPbImageURL(item, 'photo')}
+                    alt=""
+                  />
+                  <figcaption className="flex flex-col gap-1 items-center mt-2">
+                    <span>
+                      {item.title}({item.color})
+                    </span>
+                    <span className="font-semibold">
+                      {numberWithComma(item.price)}
+                    </span>
+                  </figcaption>
+                </figure>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+}
+
+export default Products;
